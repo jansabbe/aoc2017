@@ -1,19 +1,26 @@
 ﻿// Learn more about F# at http://fsharp.org
 
 open System
-open System.ComponentModel.DataAnnotations.Schema
 open System.IO
 
-let listWithTheirNextElement (input : int list) =
-    let shifted = (List.skip 1 input) @ [input.[0]]
+let pairedWithElementAtOffset (offset:int) (input : int list) =
+    let shifted = (List.skip offset input) @ (List.take offset input)
     List.zip input shifted
 
-let reverseCaptcha (input : int list) =
+let pairedWithNextElement = pairedWithElementAtOffset 1
+
+let pairedWithTheHalfwayElement input =
+    pairedWithElementAtOffset (List.length input / 2) input
+
+let reverseCaptcha (pairingAlgorithm: int list -> (int*int) list) (input : int list) =
     input
-        |> listWithTheirNextElement
+        |> pairingAlgorithm
         |> List.filter (fun (a,b) -> a = b)
         |> List.sumBy fst
 
+let reverseCaptchaWithNextElement = reverseCaptcha pairedWithNextElement
+
+let reverseCaptchaWithHalfwayElement = reverseCaptcha pairedWithTheHalfwayElement
 
 let splitIntoListOfNumbers (input : string) =
     [for c in input -> c]
@@ -22,10 +29,10 @@ let splitIntoListOfNumbers (input : string) =
 
 [<EntryPoint>]
 let main argv =
-    let result =
+    let input =
         File.ReadAllText("input.txt")
         |> splitIntoListOfNumbers
-        |> reverseCaptcha
 
-    printfn "Result: %i" result
+    printfn "Result paired with next element: %i" (reverseCaptchaWithNextElement input)
+    printfn "Result paired with halfway element: %i" (reverseCaptchaWithHalfwayElement input)
     0 // return an integer exit code
