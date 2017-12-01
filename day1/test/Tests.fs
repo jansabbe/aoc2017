@@ -4,7 +4,6 @@ open System
 open Xunit
 open Program
 
-
 let examplesWithTheNextElement : obj array seq =
     seq {
         yield [| [1;1;1;1]; 4 |]
@@ -17,8 +16,6 @@ let examplesWithTheNextElement : obj array seq =
 let ``If a digit matches the element next in the list, we sum``(input : int list, expected : int) =
     let actual = reverseCaptchaWithNextElement input
     Assert.Equal(expected, actual)
-
-
 
 let examplesWithTheHalfwayElement : obj array seq =
     seq {

@@ -1,6 +1,4 @@
-﻿// Learn more about F# at http://fsharp.org
-
-open System
+﻿open System
 open System.IO
 
 let pairedWithElementAtOffset (offset:int) (input : int list) =
@@ -23,8 +21,8 @@ let reverseCaptchaWithNextElement = reverseCaptcha pairedWithNextElement
 let reverseCaptchaWithHalfwayElement = reverseCaptcha pairedWithTheHalfwayElement
 
 let splitIntoListOfNumbers (input : string) =
-    [for c in input -> c]
-        |> List.filter (fun t -> Char.IsDigit(t))
+    List.ofSeq input
+        |> List.filter Char.IsDigit
         |> List.map (Char.GetNumericValue >> int)
 
 [<EntryPoint>]
