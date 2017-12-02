@@ -1,6 +1,5 @@
 module Tests
 
-open System
 open Xunit
 open FsUnit.Xunit
 open Program
@@ -17,13 +16,14 @@ let examplesForRowDifferences : obj array seq =
 let ``Can calculate the difference between largest and smallest value in a row`` (row, expected) =
     differenceForRow row |> should equal expected
 
+
 let examplesForEvenlyDivisibleValues : obj array seq =
     seq {
         yield [| [8;2];         4 |]
         yield [| [2;8];         4 |]
-        //yield [| [5;9;2;8];         4 |]
-        //yield [| [9;4;7;3];         3 |]
-        //yield [| [3;8;6;5];         2 |]
+        yield [| [5;9;2;8];     4 |]
+        yield [| [9;4;7;3];     3 |]
+        yield [| [3;8;6;5];     2 |]
     }
 
 [<Theory; MemberData("examplesForEvenlyDivisibleValues")>]
