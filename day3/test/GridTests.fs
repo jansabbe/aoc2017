@@ -5,6 +5,7 @@ open Xunit
 open Grid
 open FsUnit.Xunit
 open FsUnit.CustomMatchers
+open FsUnit.Xunit
 
 
 let exampleSizeGrids : obj array seq =
@@ -31,35 +32,23 @@ let ``Given a small grid can create an extra layer around it``() =
         ])
 
 [<Fact>]
-let ``Can get the coordinates the outer layer in descending order``() =
+let ``Can get the coordinates following the outer layer``() =
     coordinatesOuterLayerFollowingSpiral 3 |> should equal
         [ (2,1); (2,0); (1,0);(0,0); (0,1); (0,2); (1,2); (2,2)]
 
 [<Fact>]
-let ``Fill in outer layer``() =
-    let grid = (
-        array2D [
-            [ 0; 0; 0];
-            [ 0; 98; 0];
-            [ 0; 0; 0];
-        ])
-
-    fillInOuterLayer grid |> should equal (
-        array2D [
-            [ 5; 4;  3];
-            [ 6; 98; 2];
-            [ 7; 8;  9];
-        ])
-
+let ``Can get the coordinates following spiral``() =
+    coordinatesFollowingSpiral 3 |> should equal
+        [ (1, 1); (2,1); (2,0); (1,0);(0,0); (0,1); (0,2); (1,2); (2,2)]
 
 
 [<Fact>]
-let ``Grid of size 1 is just single element grid``() =
-    generateGridForSize 1 |> should equal (array2D [[1]])
+let ``Grid of with value 1 is just single element grid``() =
+    generateGridWithValue 1 |> should equal (array2D [[1]])
 
 [<Fact>]
-let ``Grid of size 3``() =
-    generateGridForSize 3
+let ``Grid with value 3 3``() =
+    generateGridWithValue 3
     |> should equal (
         array2D [
             [5; 4; 3];
@@ -72,6 +61,17 @@ let ``Can get the coordinates of a value``() =
     let grid = generateGridWithValue 11
     coordinatesForValue 11 grid |> should equal (4, 2)
 
+[<Fact>]
+let ``Sum neighbours``() =
+    let grid = (
+        array2D [
+            [0; 4; 2];
+            [0; 1; 1];
+            [0; 0; 0]
+        ])
+
+    sumNeighbours grid (0, 0) |> should equal 5
+
 let exampleDistances : obj array seq =
     seq {
         yield [| 1;     0 |]
@@ -83,3 +83,25 @@ let exampleDistances : obj array seq =
 [<Theory; MemberData("exampleDistances")>]
 let ``Given a grid and value returns distance from center`` (value:int, expectedDistance: int) =
     distance value  |> should equal expectedDistance
+
+
+[<Fact>]
+let ``Grid with sum neighbours``() =
+    generateGridWithSumNeighbours 3 |> should equal (
+        array2D [
+            [5;   4;  2];
+            [10;  1;  1];
+            [11; 23; 25]
+        ])
+
+
+let exampleFirstValueLargerThanInput : obj array seq =
+    seq {
+        yield [| 5;     10 |]
+        yield [| 10;    11 |]
+        yield [| 20;    23 |]
+    }
+
+[<Theory; MemberData("exampleFirstValueLargerThanInput")>]
+let ``What is first value larger than input`` (value:int, expected: int) =
+    firstValueLargerThanInput value  |> should equal expected
