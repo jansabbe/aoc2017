@@ -4,7 +4,7 @@ open System
 open System.IO
 open System.Threading
 
-let sortLetters : string -> string = List.ofSeq >> List.map string >> List.sort >> String.concat ""
+let sortLetters = Seq.sort >> Seq.map string >> String.concat ""
 
 let isAnagram (word1:string) (word2:string) : bool =
     (sortLetters word1) = (sortLetters word2)
