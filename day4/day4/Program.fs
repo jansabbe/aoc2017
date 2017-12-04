@@ -1,45 +1,38 @@
-﻿// Learn more about F# at http://fsharp.org
-
-open System
-open System.IO
-open System.Threading
+﻿open System.IO
 
 let sortLetters = Seq.sort >> Seq.map string >> String.concat ""
 
-let isAnagram (word1:string) (word2:string) : bool =
-    (sortLetters word1) = (sortLetters word2)
-
-let rec allCombinations list =
-  match list with
-    | [] -> []
-    | x::xs -> (List.map (fun t -> x,t) xs) @ allCombinations xs
+let hasDuplicate list = (List.distinct list |> List.length) <> (List.length list)
 
 let phraseToListOfWords (phrase:string) =  phrase.Split(" ") |> List.ofArray
-
-let hasAnagram (phrase:string) : bool =
-    phrase
-        |> phraseToListOfWords
-        |> allCombinations
-        |> List.exists (fun (word1,word2) -> isAnagram word1 word2)
-
 
 let hasDoubleWord (phrase:string) : bool =
     phrase
         |> phraseToListOfWords
-        |> List.groupBy id
-        |> List.exists (fun (_,wordList) -> List.length wordList > 1)
+        |> hasDuplicate
 
-let isValid = (not << hasDoubleWord)
+let doesNotHaveDoubleWord = (not << hasDoubleWord)
+
+let hasAnagram (phrase:string) : bool =
+    phrase
+        |> phraseToListOfWords
+        |> List.map sortLetters
+        |> hasDuplicate
+
+let doesNotHaveAnagram = (not << hasAnagram)
 
 [<EntryPoint>]
 let main argv =
     let phrases = File.ReadLines "input.txt"
     let phrasesWithoutDoubleWords =
         phrases
-            |> Seq.sumBy (fun phrase -> if isValid phrase then 1 else 0)
+            |> Seq.filter doesNotHaveDoubleWord
+            |> Seq.length
+
     let phrasesWithoutAnagrams =
         phrases
-            |> Seq.sumBy (fun phrase -> if not <| hasAnagram phrase then 1 else 0)
+            |> Seq.filter doesNotHaveAnagram
+            |> Seq.length
 
     printfn "Phrases without double words: %A" phrasesWithoutDoubleWords
     printfn "Phrases without anagras: %A" phrasesWithoutAnagrams
