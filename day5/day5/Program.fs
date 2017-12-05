@@ -4,35 +4,41 @@ open System
 open System.IO
 
 type Position = InsideList of int | OutsideList
-type JumpList = {jumps : int list; currentPosition: Position}
+type JumpList = {jumps : Map<int,int>; currentPosition: Position}
 
-let increaseAt (index:int) (jumps:int list) =
-    jumps
-        |> List.mapi (fun i value -> if i = index then value + 1 else value)
+let alwaysIncreaseByOne (index:int) (jumps:Map<int,int>) =
+    let newValue = jumps.[index] + 1
+    jumps |> Map.add index newValue
 
-let newPosition (jumps:int list) (index:int)  =
+let increaseOrDecrease (index:int) (jumps:Map<int,int>) =
+    let oldValue = jumps.[index]
+    let newValue = if oldValue >= 3 then oldValue - 1 else oldValue + 1
+    jumps |> Map.add index newValue
+
+let newPosition (jumps:Map<int,int>) (index:int)  =
     match (index + (jumps.[index])) with
-    | x when x < 0 -> OutsideList
-    | x when x >= List.length jumps -> OutsideList
-    | x -> InsideList x
+    | x when Map.containsKey x jumps -> InsideList x
+    | _ -> OutsideList
 
-
-let jump ({jumps=jumps; currentPosition = position}) =
+let jump offsetChanger ({jumps=jumps; currentPosition = position}) =
     match position with
     | OutsideList -> {jumps=jumps; currentPosition=position}
-    | InsideList i -> {jumps = (jumps |> increaseAt i); currentPosition=(newPosition jumps i)}
+    | InsideList i -> {jumps = (jumps |> offsetChanger i); currentPosition=(newPosition jumps i)}
 
 let isJumpedOutside ({jumps=_; currentPosition = position}) =
     position = OutsideList
 
+let rec recJumpsNeeded (current:int) offsetChanger jumpList =
+    if isJumpedOutside jumpList
+    then current
+    else recJumpsNeeded (current+1) offsetChanger (jump offsetChanger jumpList)
 
-let jumpsNeeded jumpList =
-    Seq.unfold (fun state -> Some(state, jump state)) jumpList
-        |> Seq.findIndex isJumpedOutside
+let jumpsNeeded = recJumpsNeeded 0
 
 [<EntryPoint>]
 let main argv =
     let stack = File.ReadLines("input.txt") |> Seq.map int |> List.ofSeq
-    let result = jumpsNeeded {jumps = stack; currentPosition = InsideList 0}
-    printfn "Jumps needed: %A" result
+    let map = stack |> List.zip [0 .. (stack.Length - 1)] |> Map.ofList
+    printfn "Jumps needed: %A" <| jumpsNeeded alwaysIncreaseByOne {jumps = map; currentPosition = InsideList 0}
+    printfn "Jumps needed weirdo offsetter: %A" <| jumpsNeeded increaseOrDecrease {jumps = map; currentPosition = InsideList 0}
     0 // return an integer exit code
