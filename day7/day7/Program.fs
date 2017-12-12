@@ -5,6 +5,7 @@ open FParsec
 open System.IO
 open ProgramParser
 open ProgramTree
+open System.Xml.Serialization
 
 
 let parseLine (line:string) : Statement option =
@@ -20,10 +21,11 @@ let isBalanced (programTree:TreeProgram) =
 let isUnbalanced = isBalanced >> not
 
 let rec find (predicate:TreeProgram->bool)  (treeProgram:TreeProgram) =
-    let answerInLeaves = treeProgram.leaves |> List.map (find predicate) |> List.choose id |> List.tryHead
-    if Option.isSome answerInLeaves then answerInLeaves
-    elif predicate treeProgram then Some treeProgram
-    else None
+    let foundInLeaves = List.tryPick (find predicate) treeProgram.leaves
+    match foundInLeaves with
+    | (Some _) -> foundInLeaves
+    | None when predicate treeProgram -> Some treeProgram
+    | _ -> None
 
 [<EntryPoint>]
 let main argv =
